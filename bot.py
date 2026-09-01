@@ -66,7 +66,7 @@ logger = logging.getLogger(__name__)
 # HUGGING FACE
 # ============================================================
 
-hf = InferenceClient(
+client = InferenceClient(
     api_key=HF_TOKEN,
     provider="auto",
 )

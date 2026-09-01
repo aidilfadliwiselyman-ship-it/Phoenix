@@ -23,7 +23,7 @@ HF_TOKEN = os.getenv("HF_TOKEN")
 
 CHAT_MODEL = os.getenv(
     "CHAT_MODEL",
-    "Qwen/Qwen3.8-27B"
+    "meta-llama/Llama-3.1-8B-Instruct"
 )
 
 IMAGE_MODEL = os.getenv(

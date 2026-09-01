@@ -201,7 +201,7 @@ async def handle_chat(update: Update, text: str):
 
     try:
 
-        result = hf.chat.completions.create(
+        result = hf.chat.completion(
             model=CHAT_MODEL,
             messages=messages,
             max_tokens=1024,

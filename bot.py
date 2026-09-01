@@ -21,10 +21,7 @@ from telegram.ext import (
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-CHAT_MODEL = os.getenv(
-    "CHAT_MODEL",
-    "meta-llama/Llama-3.1-8B-Instruct"
-)
+CHAT_MODEL = "meta-llama/Llama-3.1-8B-Instruct"
 
 IMAGE_MODEL = os.getenv(
     "IMAGE_MODEL",
@@ -201,7 +198,7 @@ async def handle_chat(update: Update, text: str):
 
     try:
 
-        result = hf.chat.completion(
+        result = client.chat_completion(
             model=CHAT_MODEL,
             messages=messages,
             max_tokens=1024,

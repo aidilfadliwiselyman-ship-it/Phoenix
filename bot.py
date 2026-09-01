@@ -23,7 +23,7 @@ HF_TOKEN = os.getenv("HF_TOKEN")
 
 CHAT_MODEL = os.getenv(
     "CHAT_MODEL",
-    "Qwen/Qwen2.5-7B-Instruct"
+    "JonathanColetti/Qwen3.8-27B-Uncensored-GGUF"
 )
 
 IMAGE_MODEL = os.getenv(

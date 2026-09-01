@@ -65,7 +65,7 @@ logger = logging.getLogger(__name__)
 
 client = InferenceClient(
     api_key=HF_TOKEN,
-    provider="auto",
+    provider="novita",
 )
 
 

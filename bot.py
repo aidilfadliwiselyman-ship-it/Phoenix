@@ -21,7 +21,7 @@ from telegram.ext import (
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-CHAT_MODEL = "meta-llama/Llama-3.1-8B-Instruct"
+CHAT_MODEL = "JonathanColetti/Qwen3.8-27B-Uncensored-GGUF"
 
 IMAGE_MODEL = os.getenv(
     "IMAGE_MODEL",

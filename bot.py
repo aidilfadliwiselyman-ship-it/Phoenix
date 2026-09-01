@@ -67,7 +67,7 @@ logger = logging.getLogger(__name__)
 # ============================================================
 
 hf = InferenceClient(
-    api_keyhf_VuDRQomlgmqKTFKGrYfhwcFaOAELawEaMg,
+    api_key=HF_TOKEN,
     provider="auto",
 )
 

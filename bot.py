@@ -1,143 +1,4 @@
 import os
-import logging
-
-from google import genai
-from telegram import Update
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    MessageHandler,
-    ContextTypes,
-    filters,
-)
-
-# =========================
-# CONFIG
-# =========================
-
-TELEGRAM_TOKEN = os.getenv"8712694616:AAGNGwX_ZW8GcLfOqRPlvU2upjlTOIGABXE"
-GEMINI_API_KEY = os.getenv"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"
-
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
-)
-
-if not TELEGRAM_TOKEN:
-    raise RuntimeError("TELEGRAM_TOKEN belum ditetapkan.")
-
-if not GEMINI_API_KEY:
-    raise RuntimeError("HF_TOKEN belum ditetapkan.")
-
-client = genai.Client(api_key=HF_TOKEN)
-
-# Simpan sejarah chat sementara
-chat_history = {}
-
-MAX_MESSAGES = 10
-
-
-# =========================
-# /start
-# =========================
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "🤖 Bot AI sudah aktif!\n\n"
-        "Hantar apa sahaja mesej untuk berbual dengan AI.\n\n"
-        "Contoh:\n"
-        "• Hai!\n"
-        "• Terangkan black hole\n"
-        "• Buatkan idea cerita sci-fi"
-    )
-
-
-# =========================
-# CHAT
-# =========================
-
-async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not update.message or not update.message.text:
-        return
-
-    user_id = update.effective_user.id
-    message = update.message.text
-
-    if user_id not in chat_history:
-        chat_history[user_id] = []
-
-    history = chat_history[user_id]
-
-    history.append({
-        "role": "user",
-        "text": message,
-    })
-
-    # Hadkan memory
-    if len(history) > MAX_MESSAGES:
-        history[:] = history[-MAX_MESSAGES:]
-
-    conversation = ""
-
-    for item in history:
-        if item["role"] == "user":
-            conversation += f"User: {item['text']}\n"
-        else:
-            conversation += f"Assistant: {item['text']}\n"
-
-    await update.message.chat.send_action("typing")
-
-    try:
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=conversation,
-        )
-
-        reply = response.text
-
-        history.append({
-            "role": "assistant",
-            "text": reply,
-        })
-
-        if len(history) > MAX_MESSAGES:
-            history[:] = history[-MAX_MESSAGES:]
-
-        await update.message.reply_text(reply)
-
-    except Exception as e:
-        logging.exception("Gemini error")
-
-        await update.message.reply_text(
-            "❌ Gemini mengalami ralat.\n\n"
-            f"{type(e).__name__}: {e}"
-        )
-
-
-# =========================
-# MAIN
-# =========================
-
-def main():
-    app = Application.builder().token(TELEGRAM_TOKEN).build()
-
-    app.add_handler(CommandHandler("start", start))
-
-    app.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            chat,
-        )
-    )
-
-    print("🤖 Bot sedang berjalan...")
-
-    app.run_polling()
-
-
-if __name__ == "__main__":
-    main()
-import os
 import io
 import logging
 from collections import defaultdict
@@ -157,25 +18,26 @@ from telegram.ext import (
 # CONFIG
 # ============================================================
 
-TELEGRAM_TOKEN = os.getenv("8712694616:AAGNGwX_ZW8GcLfOqRPlvU2upjlTOIGABXE")
-HF_TOKEN = os.getenv("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")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+HF_TOKEN = os.getenv("HF_TOKEN")
 
 CHAT_MODEL = os.getenv(
     "CHAT_MODEL",
-    "JonathanColetti/Qwen3.8-27B-Uncensored-GGUF"
+    "Qwen/Qwen2.5-7B-Instruct"
 )
 
 IMAGE_MODEL = os.getenv(
     "IMAGE_MODEL",
-    "Shar514/Flux-Uncensored-V2"
+    "darknight9121/FLUX.2-klein-base-9B-bucket-uncensored"
 )
 
 EDIT_MODEL = os.getenv(
     "EDIT_MODEL",
-    "Shar514/Flux-Uncensored-V2"
+    "darknight9121/FLUX.2-klein-base-9B-bucket-uncensored"
 )
 
 MAX_HISTORY = 12
+
 
 # ============================================================
 # CHECK CONFIG
@@ -186,6 +48,7 @@ if not TELEGRAM_TOKEN:
 
 if not HF_TOKEN:
     raise RuntimeError("HF_TOKEN belum ditetapkan.")
+
 
 # ============================================================
 # LOGGING
@@ -198,14 +61,16 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+
 # ============================================================
 # HUGGING FACE
 # ============================================================
 
 hf = InferenceClient(
-    api_key=HF_TOKEN,
+    api_keyhf_VuDRQomlgmqKTFKGrYfhwcFaOAELawEaMg,
     provider="auto",
 )
+
 
 # ============================================================
 # MEMORY
@@ -219,26 +84,27 @@ def trim_history(user_id):
 
 
 # ============================================================
-# START
+# /START
 # ============================================================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
         "🤖 Hai! Aku dah aktif.\n\n"
-        "Tak perlu command.\n"
+        "Tak perlu command untuk guna AI.\n"
         "Cakap sahaja apa yang kau nak.\n\n"
         "Contoh:\n"
-        "• Hai, apa khabar?\n"
+        "• Hai bro\n"
         "• Terangkan black hole\n"
         "• Buat gambar bandar futuristik\n"
         "• Edit gambar ini jadi gaya anime\n\n"
-        "Aku akan cuba faham sendiri."
+        "Aku akan cuba faham sendiri.\n\n"
+        "/reset = kosongkan memory"
     )
 
 
 # ============================================================
-# RESET
+# /RESET
 # ============================================================
 
 async def reset(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -260,6 +126,19 @@ def detect_intent(text):
 
     t = text.lower().strip()
 
+    edit_words = [
+        "edit gambar",
+        "ubah gambar",
+        "tukar gambar",
+        "ubah imej",
+        "tukar imej",
+        "jadikan gambar",
+        "jadikan imej",
+        "buang latar",
+        "tukar latar",
+        "ubah background",
+    ]
+
     image_words = [
         "buat gambar",
         "hasilkan gambar",
@@ -278,19 +157,6 @@ def detect_intent(text):
         "wallpaper",
     ]
 
-    edit_words = [
-        "edit gambar",
-        "ubah gambar",
-        "tukar gambar",
-        "ubah imej",
-        "tukar imej",
-        "jadikan gambar",
-        "jadikan imej",
-        "buang latar",
-        "tukar latar",
-        "ubah background",
-    ]
-
     for word in edit_words:
         if word in t:
             return "edit"
@@ -306,10 +172,7 @@ def detect_intent(text):
 # CHAT
 # ============================================================
 
-async def handle_chat(
-    update: Update,
-    text: str,
-):
+async def handle_chat(update: Update, text: str):
 
     user_id = update.effective_user.id
 
@@ -364,7 +227,7 @@ async def handle_chat(
         logger.exception("Chat error")
 
         await update.message.reply_text(
-            "❌ Chat AI gagal.\n"
+            "❌ Chat AI gagal.\n\n"
             f"{type(e).__name__}: {e}"
         )
 
@@ -373,10 +236,7 @@ async def handle_chat(
 # IMAGE GENERATION
 # ============================================================
 
-async def handle_image(
-    update: Update,
-    prompt: str,
-):
+async def handle_image(update: Update, prompt: str):
 
     status = await update.message.reply_text(
         "🎨 Sedang menghasilkan gambar..."
@@ -410,7 +270,7 @@ async def handle_image(
         logger.exception("Image error")
 
         await status.edit_text(
-            "❌ Gagal menghasilkan gambar.\n"
+            "❌ Gagal menghasilkan gambar.\n\n"
             f"{type(e).__name__}: {e}"
         )
 
@@ -419,10 +279,7 @@ async def handle_image(
 # IMAGE EDIT
 # ============================================================
 
-async def handle_edit(
-    update: Update,
-    prompt: str,
-):
+async def handle_edit(update: Update, prompt: str):
 
     message = update.message
 
@@ -443,7 +300,7 @@ async def handle_edit(
 
         photo = message.photo[-1]
 
-        telegram_file = await update.get_bot().get_file(
+        telegram_file = await context.bot.get_file(
             photo.file_id
         )
 
@@ -476,13 +333,13 @@ async def handle_edit(
         logger.exception("Edit error")
 
         await status.edit_text(
-            "❌ Gagal mengedit gambar.\n"
+            "❌ Gagal mengedit gambar.\n\n"
             f"{type(e).__name__}: {e}"
         )
 
 
 # ============================================================
-# TEXT MESSAGE ROUTER
+# TEXT ROUTER
 # ============================================================
 
 async def handle_text(
@@ -501,25 +358,24 @@ async def handle_text(
     intent = detect_intent(text)
 
     logger.info(
-        "User %s intent=%s",
+        "User %s -> %s",
         update.effective_user.id,
         intent,
     )
 
     if intent == "image":
 
-        prompt = text
-
         await handle_image(
             update,
-            prompt,
+            text,
         )
 
     elif intent == "edit":
 
-        await handle_edit(
-            update,
-            text,
+        # Untuk teks sahaja, minta gambar.
+        await update.message.reply_text(
+            "🖼️ Hantar gambar bersama arahan perubahan "
+            "yang kau mahu."
         )
 
     else:
@@ -531,7 +387,7 @@ async def handle_text(
 
 
 # ============================================================
-# PHOTO MESSAGE
+# PHOTO ROUTER
 # ============================================================
 
 async def handle_photo(
@@ -550,17 +406,55 @@ async def handle_photo(
 
         await message.reply_text(
             "🖼️ Aku nampak gambar.\n"
-            "Beritahu apa yang kau mahu aku buat "
-            "dengan gambar ini."
+            "Beritahu apa yang kau mahu aku ubah."
         )
 
         return
 
-    # Gambar + arahan = edit
-    await handle_edit(
-        update,
-        caption,
+    status = await message.reply_text(
+        "🖼️ Sedang memproses gambar..."
     )
+
+    try:
+
+        photo = message.photo[-1]
+
+        telegram_file = await context.bot.get_file(
+            photo.file_id
+        )
+
+        image_bytes = await telegram_file.download_as_bytearray()
+
+        result = hf.image_to_image(
+            image=bytes(image_bytes),
+            prompt=caption,
+            model=EDIT_MODEL,
+        )
+
+        buffer = io.BytesIO()
+
+        result.save(
+            buffer,
+            format="PNG",
+        )
+
+        buffer.seek(0)
+
+        await status.delete()
+
+        await message.reply_photo(
+            photo=buffer,
+            caption="🖼️ Siap."
+        )
+
+    except Exception as e:
+
+        logger.exception("Image edit error")
+
+        await status.edit_text(
+            "❌ Image editing gagal.\n\n"
+            f"{type(e).__name__}: {e}"
+        )
 
 
 # ============================================================
@@ -590,7 +484,6 @@ def main():
         .build()
     )
 
-    # Hanya command yang kita simpan ialah start/reset
     app.add_handler(
         CommandHandler("start", start)
     )
@@ -599,15 +492,6 @@ def main():
         CommandHandler("reset", reset)
     )
 
-    # Text biasa
-    app.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND,
-            handle_text,
-        )
-    )
-
-    # Gambar dengan caption
     app.add_handler(
         MessageHandler(
             filters.PHOTO,
@@ -615,10 +499,17 @@ def main():
         )
     )
 
+    app.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND,
+            handle_text,
+        )
+    )
+
     app.add_error_handler(error_handler)
 
     logger.info(
-        "Telegram AI Auto-Router sedang berjalan."
+        "🤖 Telegram + Hugging Face Auto AI started."
     )
 
     app.run_polling()

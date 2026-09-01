@@ -21,7 +21,7 @@ from telegram.ext import (
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-CHAT_MODEL = "JonathanColetti/Qwen3.8-27B-Uncensored-GGUF"
+CHAT_MODEL = "petruhonk/Qwen3.8-9B-Distill-uncensored-heretic-GGUF"
 
 IMAGE_MODEL = os.getenv(
     "IMAGE_MODEL",
@@ -65,7 +65,7 @@ logger = logging.getLogger(__name__)
 
 client = InferenceClient(
     api_key=HF_TOKEN,
-    provider="novita",
+    provider="apache-2.0",
 )
 
 
@@ -77,10 +77,7 @@ memory = defaultdict(list)
 
 
 def trim_history(user_id):
-    memory[user_id] = memory[user_id][-MAX_HISTORY:]
-
-
-# ============================================================
+    memory[user_id] = memory[user_id][-MAX_HISTO=====================================================
 # /START
 # ============================================================
 
